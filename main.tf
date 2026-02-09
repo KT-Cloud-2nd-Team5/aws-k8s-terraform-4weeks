@@ -62,7 +62,7 @@ resource "aws_instance" "bastion" {
 
 resource "aws_instance" "k3s_master" {
   ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
+  instance_type          = "t3.small"
   subnet_id              = aws_subnet.private_a.id
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.k3s_master.id]
