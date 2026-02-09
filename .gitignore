@@ -42,3 +42,9 @@ terraform.rc
 
 # local terraform folders
 .terraform/
+
+# Ansible inventory files
+inventory.ini
+
+# PowerShell script to
+verify_infra.ps1
