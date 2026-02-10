@@ -81,6 +81,7 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = var.pc_public_ips
   }
 
+  # proxy
   ingress {
     from_port   = 3128
     to_port     = 3128
