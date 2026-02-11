@@ -1,5 +1,5 @@
 # [1] 접속 명령어 모음
-output "a_connection_commands" {
+output "A_connection_commands" {
   description = "각 서버 접속을 위한 SSH 명령어 모음"
   value = {
     "1_Bastion_Host" = "ssh -i ${var.private_key_path} ubuntu@${aws_instance.bastion.public_ip}"
@@ -11,7 +11,7 @@ output "a_connection_commands" {
 }
 
 # [2] 클러스터 노드 정보
-output "b_cluster_nodes" {
+output "B_cluster_nodes" {
   description = "K3s 노드들의 IP 정보"
   value = {
     "Master_Node"   = "Private: ${aws_instance.k3s_master.private_ip}"
@@ -22,7 +22,7 @@ output "b_cluster_nodes" {
 }
 
 # [3] 설정값
-output "c_app_config" {
+output "C_app_config" {
   description = "설정 참고값"
   value = {
     "1_ALB_DNS"       = "http://${aws_lb.main.dns_name}"
@@ -31,8 +31,19 @@ output "c_app_config" {
   }
 }
 
-# [4] 검증 스크립트 실행 명령어
-output "d_verify_command" {
+# [4] Backend
+output "D_backend_info" {
+  description = "Terraform Backend S3 연결 정보"
+  value = {
+    bucket_name = data.aws_s3_bucket.tfstate_bucket.id
+    region      = data.aws_s3_bucket.tfstate_bucket.region
+    arn         = data.aws_s3_bucket.tfstate_bucket.arn
+    console_url = "https://s3.console.aws.amazon.com/s3/buckets/${data.aws_s3_bucket.tfstate_bucket.id}?region=${data.aws_s3_bucket.tfstate_bucket.region}"
+  }
+}
+
+# [5] 검증 스크립트 실행 명령어
+output "E_verify_command" {
   description = "Windows PowerShell에서 인프라 검증 스크립트를 바로 실행하는 명령어"
   value       = "powershell -ExecutionPolicy Bypass -File .\\verify_infra.ps1"
 }
