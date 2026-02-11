@@ -15,8 +15,3 @@ variable "private_key_path" {
   description = "Local path to private key file (e.g., ./my-key.pem)"
   type        = string
 }
-# [4] aws 사용 계정 (.aws/.credential 안에서 설정한 이름)
-variable "aws_profile" {
-  type    = string
-  default = "default"
-}

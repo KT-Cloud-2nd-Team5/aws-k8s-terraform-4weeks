@@ -11,8 +11,7 @@ terraform {
 }
 
 provider "aws" {
-  region  = "ap-northeast-2" # 서울 리전
-  profile = var.aws_profile
+  region = "ap-northeast-2" # 서울 리전
 }
 
 
