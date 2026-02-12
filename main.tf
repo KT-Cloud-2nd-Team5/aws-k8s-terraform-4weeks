@@ -48,15 +48,26 @@ resource "aws_instance" "bastion" {
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.bastion.id]
   # squid proxy 설정
-  user_data = <<-EOF
+  user_data = replace(<<-EOF
               #!/bin/bash
               apt update -y
               apt install squid -y              
               sed -i 's/http_access deny all/http_access allow all/g' /etc/squid/squid.conf
               systemctl restart squid
               EOF
+  , "\r", "")
 
   tags = { Name = "EC2-Bastion" }
+
+  lifecycle {
+    # 아래 나열된 항목은 코드에서 값이 바뀌더라도 실제 서버에 반영하지 않음
+    ignore_changes = [
+      ami,
+      instance_type,
+      user_data,
+      key_name
+    ]
+  }
 }
 
 resource "aws_instance" "k3s_master" {
