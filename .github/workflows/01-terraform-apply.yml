@@ -1,61 +1,98 @@
-name: 01-Terraform Apply (Bastion Runner)
+name: 01-Terraform Apply (Bastion Runner) # GitHub Actions에서 보여질 워크플로우 이름
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main"] # 메인 브랜치에 코드가 푸시될 때만 실행
     paths:
-      # 루트에 있는 모든 .tf 파일과 설정파일 감시
-      - "**.tf"
-      - "terraform.tfvars"
-      - ".github/workflows/01-terraform-apply.yml"
+      - "*.tf"                             # 모든 테라폼 설정 파일 변경 감지
+      - "terraform.tfvars"                 # 변수 설정 파일 변경 감지
+      - ".github/workflows/01-terraform-apply.yml" # 워크플로우 자체 변경 감지
+
+  workflow_dispatch: # 버튼을 눌러서 수동으로도 실행 가능하게 설정
+
+concurrency: # 배포 충돌 방지 설정
+  group: terraform-apply     # 동일 그룹 내에서는 한 번에 하나만 실행
+  cancel-in-progress: false  # 먼저 돌아가는 배포가 있다면 취소하지 않고 기다림
 
 jobs:
   terraform-apply:
-    runs-on: self-hosted
+    runs-on: self-hosted # 내가 직접 띄운 서버(Bastion 등)의 Runner 사용
 
-    env:
-      # [중요] AWS 인증 정보: GitHub Secrets에서 가져옴
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ap-northeast-2
-
-      # 파일들이 루트에 있으므로 현재 디렉토리(.) 설정
-      TF_DIR: . 
-      ANSIBLE_REPO: KT-Cloud-2nd-Team5/aws-k8s-ansible-4weeks
+    env: # 작업 전반에서 사용할 환경 변수 설정
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}         # 보안 비밀에서 AWS 키 가져오기
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # 보안 비밀에서 AWS 비밀키 가져오기
+      AWS_REGION: ap-northeast-2                                  # 서울 리전 설정
+      TF_DIR: .                                                   # 테라폼 파일 위치 (현재 루트)
+      ANSIBLE_REPO: KT-Cloud-2nd-Team5/aws-k8s-ansible-4weeks    # 연동할 앤서블 레포 이름
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # 현재 저장소의 코드를 서버로 내려받음
+
+      - name: Install Dependencies
+        # 테라폼 설치를 위해 필요한 unzip 도구 설치
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v3 # GitHub에서 제공하는 테라폼 설치 도구
         with:
           terraform_version: "1.7.5"
-          terraform_wrapper: false
+          terraform_wrapper: false # 결과값이 텍스트 그대로 나오게 설정 (상태 제어에 필요)
 
-      # 이전 인증 기록 삭제하여 충돌 방지
       - name: Clear AWS_PROFILE
-        run: unset AWS_PROFILE
+        run: unset AWS_PROFILE # 기존 서버에 남은 AWS 프로필 기록을 지워 충돌 방지
 
-      - name: Terraform init
+      - name: Terraform Init
         working-directory: ${{ env.TF_DIR }}
+        # S3 백엔드와 연결하고 필요한 플러그인을 가져옴
         run: terraform init -input=false
 
-      - name: Terraform plan
+      - name: Terraform Format Check
         working-directory: ${{ env.TF_DIR }}
-        run: terraform plan -out=tfplan
+        # 코드가 테라폼 표준 스타일에 맞는지 검사 (맞지 않으면 에러 발생)
+        run: terraform fmt -check -recursive
 
-      - name: Terraform apply
+      - name: Terraform Validate
         working-directory: ${{ env.TF_DIR }}
+        # 코드의 문법적 오류가 없는지 최종 검사
+        run: terraform validate
+
+      - name: Terraform Plan (detect changes)
+        working-directory: ${{ env.TF_DIR }}
+        # 변경 사항을 감지하고 결과 코드를 환경 변수에 저장
+        run: |
+          set +e # 에러가 나도 바로 멈추지 않게 설정 (종료 코드 분석 때문)
+          terraform plan -detailed-exitcode -out=tfplan
+          code=$? # 실행 결과 코드 저장 (0: 변경없음, 2: 변경있음, 1: 에러)
+          echo "PLAN_EXITCODE=$code" >> $GITHUB_ENV
+
+          if [ "$code" -eq 0 ]; then
+            echo "No changes." # 바뀐 게 없으면 평화롭게 종료
+            exit 0
+          elif [ "$code" -eq 2 ]; then
+            echo "Changes detected." # 바뀐 게 있으면 다음 단계로 진행
+            exit 0
+          else
+            echo "Plan failed." # 진짜 문법 에러 등은 실패 처리
+            exit 1
+          fi
+
+      - name: Terraform Apply (only if changes)
+        # 위 단계에서 '변경 사항 있음(2)' 결과가 나왔을 때만 실행
+        if: env.PLAN_EXITCODE == '2'
+        working-directory: ${{ env.TF_DIR }}
+        # 미리 만들어둔 계획 파일(tfplan)을 사용하여 실제 인프라에 적용
         run: terraform apply -auto-approve tfplan
 
-      # 테라폼 성공 시 앤서블 레포지토리 실행 트리거
-      #- name: Trigger ansible repository
-      #  env:
-      #    DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
-      #  run: |
-      #    curl -X POST \
-      #      -H "Accept: application/vnd.github+json" \
-      #      -H "Authorization: Bearer ${DISPATCH_TOKEN}" \
-      #      https://api.github.com/repos/${{ env.ANSIBLE_REPO }}/dispatches \
-      #      -d '{"event_type":"run-ansible"}'
+      # 앤서블 트리거 주석 (필요 시 토큰 설정 후 해제)
+      # - name: Trigger Ansible Repository
+      #   env:
+      #     DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+      #   run: |
+      #     curl -X POST \
+      #       -H "Accept: application/vnd.github+json" \
+      #       -H "Authorization: Bearer ${DISPATCH_TOKEN}" \
+      #       https://api.github.com/repos/${{ env.ANSIBLE_REPO }}/dispatches \
+      #       -d '{"event_type":"run-ansible"}'
