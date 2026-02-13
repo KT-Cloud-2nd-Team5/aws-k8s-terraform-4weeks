@@ -200,10 +200,11 @@ resource "aws_security_group" "monitoring" {
   vpc_id = aws_vpc.main.id
 
   ingress {
-    from_port       = 9100
-    to_port         = 9100
-    protocol        = "tcp"
-    security_groups = [aws_security_group.bastion.id]
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    # security_groups = [aws_security_group.bastion.id]
   }
 }
 
