@@ -71,37 +71,68 @@ resource "aws_instance" "bastion" {
 }
 
 resource "aws_instance" "k3s_master" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.small"
-  subnet_id              = aws_subnet.private_a.id
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_master.id, aws_security_group.monitoring.id]
-  tags                   = { Name = "K3s-Master" }
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.small"
+  subnet_id     = aws_subnet.private_a.id
+  key_name      = var.key_name
+  vpc_security_group_ids = [
+    aws_security_group.k3s_master.id,
+    aws_security_group.monitoring.id
+  ]
+  tags = {
+    Name        = "K3s-Master"
+    Role        = "master"
+    Environment = "dev"
+  }
 }
 
 resource "aws_instance" "web_worker_1" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
-  subnet_id              = aws_subnet.public_a.id
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id, aws_security_group.monitoring.id]
-  tags                   = { Name = "K3s-Web-01" }
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+  subnet_id     = aws_subnet.public_a.id
+  key_name      = var.key_name
+  vpc_security_group_ids = [
+    aws_security_group.k3s_nodes.id,
+    aws_security_group.monitoring.id
+  ]
+  tags = {
+    Name        = "K3s-Web-01"
+    Role        = "web"
+    Type        = "workers"
+    Environment = "dev"
+  }
 }
 
 resource "aws_instance" "web_worker_2" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
-  subnet_id              = aws_subnet.public_a.id
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id, aws_security_group.monitoring.id]
-  tags                   = { Name = "K3s-Web-02" }
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+  subnet_id     = aws_subnet.public_a.id
+  key_name      = var.key_name
+  vpc_security_group_ids = [
+    aws_security_group.k3s_nodes.id,
+    aws_security_group.monitoring.id
+  ]
+  tags = {
+    Name        = "K3s-Web-02"
+    Role        = "web"
+    Type        = "workers"
+    Environment = "dev"
+  }
 }
 
 resource "aws_instance" "db_worker" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.micro"
-  subnet_id              = aws_subnet.private_a.id
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id, aws_security_group.monitoring.id]
-  tags                   = { Name = "K3s-DB-01" }
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.micro"
+  subnet_id     = aws_subnet.private_a.id
+  key_name      = var.key_name
+  vpc_security_group_ids = [
+    aws_security_group.k3s_nodes.id,
+    aws_security_group.monitoring.id
+  ]
+  tags = {
+    Name        = "K3s-DB-01"
+    Role        = "db"
+    Type        = "workers"
+    Environment = "dev"
+  }
 }
