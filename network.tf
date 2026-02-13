@@ -89,12 +89,20 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = ["10.0.0.0/16"]
   }
 
-  # monitoring
+  # Prometheus
   ingress {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = var.pc_public_ips
+  }
+
+  # Grafana
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = var.pc_public_ips
   }
 
   egress {
