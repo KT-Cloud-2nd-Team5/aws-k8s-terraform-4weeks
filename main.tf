@@ -102,6 +102,6 @@ resource "aws_instance" "db_worker" {
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.private_a.id
   key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
+  vpc_security_group_ids = [aws_security_group.k3s_nodes.id, aws_security_group.monitoring.id]
   tags                   = { Name = "K3s-DB-01" }
 }
