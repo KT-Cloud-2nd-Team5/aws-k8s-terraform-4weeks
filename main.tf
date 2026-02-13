@@ -11,7 +11,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "ap-northeast-2" # 서울 리전
+  region = "ap-northeast-2"
 }
 
 
@@ -20,7 +20,7 @@ provider "aws" {
 # -----------------------------------------------------------------------------
 data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["099720109477"] # Canonical
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
