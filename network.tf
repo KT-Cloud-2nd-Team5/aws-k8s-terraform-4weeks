@@ -195,14 +195,14 @@ resource "aws_security_group" "k3s_nodes" {
   tags = { Name = "SG-K3s-Nodes" }
 }
 
-resource "aws_security_gruop" "monitoring" {
+resource "aws_security_group" "monitoring" {
   name   = "sg_monitoring"
   vpc_id = aws_vpc.main.id
 
   ingress {
     from_port   = 9100
     to_port     = 9100
-    protocl     = "tcp"
+    protocol    = "tcp"
     cidr_blocks = [aws_security_group.bastion.id]
   }
 }
