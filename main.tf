@@ -75,7 +75,7 @@ resource "aws_instance" "k3s_master" {
   instance_type          = "t3.small"
   subnet_id              = aws_subnet.private_a.id
   key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_master.id]
+  vpc_security_group_ids = [aws_security_group.k3s_master.id, aws_security_group.monitoring]
   tags                   = { Name = "K3s-Master" }
 }
 
@@ -84,7 +84,7 @@ resource "aws_instance" "web_worker_1" {
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.public_a.id
   key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
+  vpc_security_group_ids = [aws_security_group.k3s_nodes.id, aws_security_group.monitoring]
   tags                   = { Name = "K3s-Web-01" }
 }
 
@@ -93,7 +93,7 @@ resource "aws_instance" "web_worker_2" {
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.public_a.id
   key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
+  vpc_security_group_ids = [aws_security_group.k3s_nodes.id, aws_security_group.monitoring]
   tags                   = { Name = "K3s-Web-02" }
 }
 

@@ -155,12 +155,6 @@ resource "aws_security_group" "k3s_master" {
     protocol    = "udp"
     cidr_blocks = ["10.0.0.0/16"]
   }
-  ingress {
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -192,12 +186,6 @@ resource "aws_security_group" "k3s_nodes" {
     protocol    = "udp"
     cidr_blocks = ["10.0.0.0/16"]
   }
-  ingress {
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -207,6 +195,17 @@ resource "aws_security_group" "k3s_nodes" {
   tags = { Name = "SG-K3s-Nodes" }
 }
 
+resource "aws_security_gruop" "monitoring" {
+  name   = "sg_monitoring"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 9100
+    to_port     = 9100
+    protocl     = "tcp"
+    cidr_blocks = [aws_security_group.bastion.id]
+  }
+}
 
 # -----------------------------------------------------------------------------
 # ALB
