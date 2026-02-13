@@ -2,30 +2,41 @@ name: 01-Terraform Apply (Bastion Runner)
 
 on:
   push:
-    branches: ["main"]
+    #감시할 브랜치 설정 (main 혹은 cicd-test에 푸시될 때 작동)
+    branches: ["main", "cicd-test"]
     paths:
-      # 루트에 있는 모든 .tf 파일과 설정파일 감시
       - "**.tf"
       - "terraform.tfvars"
       - ".github/workflows/01-terraform-apply.yml"
 
+  #버튼 클릭으로 수동 실행 가능하게 설정
+  workflow_dispatch: 
+
+concurrency:
+  group: terraform-apply
+  cancel-in-progress: false
+
 jobs:
   terraform-apply:
+    # 직접 띄운 서버(Bastion)의 러너 사용
     runs-on: self-hosted
 
     env:
-      # [중요] AWS 인증 정보: GitHub Secrets에서 가져옴
+      #GitHub Secrets에서 가져올 보안 정보
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-2
-
-      # 파일들이 루트에 있으므로 현재 디렉토리(.) 설정
-      TF_DIR: . 
+      TF_DIR: .
       ANSIBLE_REPO: KT-Cloud-2nd-Team5/aws-k8s-ansible-4weeks
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -33,29 +44,53 @@ jobs:
           terraform_version: "1.7.5"
           terraform_wrapper: false
 
-      # 이전 인증 기록 삭제하여 충돌 방지
       - name: Clear AWS_PROFILE
         run: unset AWS_PROFILE
 
-      - name: Terraform init
+      - name: Terraform Init
         working-directory: ${{ env.TF_DIR }}
         run: terraform init -input=false
 
-      - name: Terraform plan
+      - name: Terraform Format Check
         working-directory: ${{ env.TF_DIR }}
-        run: terraform plan -out=tfplan
+        run: terraform fmt -check -recursive || echo "Format check failed, but continuing..."
 
-      - name: Terraform apply
+      - name: Terraform Validate
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform validate
+
+      - name: Terraform Plan (detect changes)
+        id: plan
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          set +e
+          terraform plan -detailed-exitcode -out=tfplan
+          code=$?
+          echo "PLAN_EXITCODE=$code" >> $GITHUB_ENV
+          
+          if [ "$code" -eq 0 ]; then
+            echo "결과: 변경 사항 없음."
+          elif [ "$code" -eq 2 ]; then
+            echo "결과: 인프라 변경 감지됨. Apply를 진행합니다."
+          else
+            echo "결가: Plan 중 에러 발생."
+            exit 1
+          fi
+
+      - name: Terraform Apply (only if changes)
+        # Plan 결과가 '2'(변경 있음)일 때만 실제 반영
+        if: env.PLAN_EXITCODE == '2'
         working-directory: ${{ env.TF_DIR }}
         run: terraform apply -auto-approve tfplan
 
       # 테라폼 성공 시 앤서블 레포지토리 실행 트리거
-      #- name: Trigger ansible repository
-      #  env:
-      #    DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
-      #  run: |
-      #    curl -X POST \
-      #      -H "Accept: application/vnd.github+json" \
-      #      -H "Authorization: Bearer ${DISPATCH_TOKEN}" \
-      #      https://api.github.com/repos/${{ env.ANSIBLE_REPO }}/dispatches \
-      #      -d '{"event_type":"run-ansible"}'
+      - name: Trigger Ansible Repository
+        if: env.PLAN_EXITCODE == '2' # 인프라 변경이 실제로 있을 때만 앤서블 호출
+        env:
+          DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${DISPATCH_TOKEN}" \
+            https://api.github.com/repos/${{ env.ANSIBLE_REPO }}/dispatches \
+            -d '{"event_type":"run-ansible"}'
