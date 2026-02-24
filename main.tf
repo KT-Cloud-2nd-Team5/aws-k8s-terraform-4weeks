@@ -84,6 +84,12 @@ resource "aws_instance" "k3s_master" {
     Role        = "master"
     Environment = "dev"
   }
+
+  lifecycle {
+    ignore_changes = [
+      ami,
+    ]
+  }
 }
 
 resource "aws_instance" "web_worker_1" {
@@ -100,6 +106,12 @@ resource "aws_instance" "web_worker_1" {
     Role        = "web"
     Type        = "workers"
     Environment = "dev"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      ami,
+    ]
   }
 }
 
@@ -118,6 +130,12 @@ resource "aws_instance" "web_worker_2" {
     Type        = "workers"
     Environment = "dev"
   }
+
+  lifecycle {
+    ignore_changes = [
+      ami,
+    ]
+  }
 }
 
 resource "aws_instance" "db_worker" {
@@ -134,5 +152,11 @@ resource "aws_instance" "db_worker" {
     Role        = "db"
     Type        = "workers"
     Environment = "dev"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      ami,
+    ]
   }
 }
