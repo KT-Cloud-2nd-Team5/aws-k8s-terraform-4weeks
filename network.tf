@@ -125,6 +125,7 @@ resource "aws_security_group" "alb" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   ingress {
     from_port   = 443
     to_port     = 443
@@ -151,24 +152,28 @@ resource "aws_security_group" "k3s_master" {
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
   }
+
   ingress {
     from_port   = 6443
     to_port     = 6443
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
   }
+
   ingress {
     from_port   = 8472
     to_port     = 8472
     protocol    = "udp"
     cidr_blocks = ["10.0.0.0/16"]
   }
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
   tags = { Name = "SG-K3s-Master" }
 }
 
@@ -182,18 +187,21 @@ resource "aws_security_group" "k3s_nodes" {
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
   }
+
   # ingress {
   #   from_port       = 30000
   #   to_port         = 32767
   #   protocol        = "tcp"
   #   security_groups = [aws_security_group.alb.id]
   # }
+
   ingress {
     from_port   = 8472
     to_port     = 8472
     protocol    = "udp"
     cidr_blocks = ["10.0.0.0/16"]
   }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -211,8 +219,16 @@ resource "aws_security_group" "monitoring" {
     from_port       = 9100
     to_port         = 9100
     protocol        = "tcp"
-    cidr_blocks     = ["0.0.0.0/0"]
     security_groups = [aws_security_group.bastion.id]
+    description     = "Allow Prometheus on Bastion to scrape Node Exporter"
+  }
+
+  ingress {
+    from_port   = 10250
+    to_port     = 10250
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+    description = "Allow Kubelet API for HPA"
   }
 }
 
