@@ -57,7 +57,11 @@ resource "aws_instance" "bastion" {
               EOF
   , "\r", "")
 
-  tags = { Name = "EC2-Bastion" }
+  root_block_device {
+    volume_size           = 10
+    volume_type           = "gp3"
+    delete_on_termination = true
+  }
 
   lifecycle {
     # 아래 나열된 항목은 코드에서 값이 바뀌더라도 실제 서버에 반영하지 않음
@@ -68,6 +72,9 @@ resource "aws_instance" "bastion" {
       key_name
     ]
   }
+  tags = { Name = "EC2-Bastion" }
+
+
 }
 
 resource "aws_instance" "k3s_master" {
