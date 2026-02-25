@@ -81,28 +81,28 @@ resource "aws_security_group" "bastion" {
     cidr_blocks = var.pc_public_ips
   }
 
-  # proxy
   ingress {
     from_port   = 3128
     to_port     = 3128
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/16"]
+    description = "proxy"
   }
 
-  # Prometheus
   ingress {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = var.pc_public_ips
+    cidr_blocks = concat(var.pc_public_ips, ["10.0.0.0/16"])
+    description = "Prometheus"
   }
 
-  # Grafana
   ingress {
     from_port   = 3000
     to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = var.pc_public_ips
+    description = "Grafana"
   }
 
   egress {
@@ -219,6 +219,7 @@ resource "aws_security_group" "monitoring" {
     from_port       = 9100
     to_port         = 9100
     protocol        = "tcp"
+    cidr_blocks     = ["10.0.0.0/16"]
     security_groups = [aws_security_group.bastion.id]
     description     = "Allow Prometheus on Bastion to scrape Node Exporter"
   }
