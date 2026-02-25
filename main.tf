@@ -101,7 +101,7 @@ resource "aws_instance" "k3s_master" {
 
 resource "aws_instance" "web_worker_1" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
+  instance_type = "t3.small"
   subnet_id     = aws_subnet.public_a.id
   key_name      = var.key_name
   vpc_security_group_ids = [
@@ -124,7 +124,7 @@ resource "aws_instance" "web_worker_1" {
 
 resource "aws_instance" "web_worker_2" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
+  instance_type = "t3.small"
   subnet_id     = aws_subnet.public_a.id
   key_name      = var.key_name
   vpc_security_group_ids = [
@@ -147,7 +147,7 @@ resource "aws_instance" "web_worker_2" {
 
 resource "aws_instance" "db_worker" {
   ami           = data.aws_ami.ubuntu.id
-  instance_type = "t3.micro"
+  instance_type = "t3.small"
   subnet_id     = aws_subnet.private_a.id
   key_name      = var.key_name
   vpc_security_group_ids = [
