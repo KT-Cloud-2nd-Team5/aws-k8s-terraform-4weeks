@@ -93,7 +93,7 @@ resource "aws_security_group" "bastion" {
     from_port   = 9090
     to_port     = 9090
     protocol    = "tcp"
-    cidr_blocks = concat(var.pc_public_ips, ["10.0.0.0/16"])
+    cidr_blocks = var.pc_public_ips
     description = "Prometheus"
   }
 
