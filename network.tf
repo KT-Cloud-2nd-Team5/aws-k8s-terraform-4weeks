@@ -202,6 +202,15 @@ resource "aws_security_group" "k3s_nodes" {
     cidr_blocks = ["10.0.0.0/16"]
   }
 
+  # ALB에서 들어오는 80번 포트(Traefik) 허용
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -247,7 +256,7 @@ resource "aws_lb" "main" {
 
 resource "aws_lb_target_group" "web" {
   name     = "k3s-web-tg"
-  port     = 30080
+  port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
 }
@@ -255,13 +264,13 @@ resource "aws_lb_target_group" "web" {
 resource "aws_lb_target_group_attachment" "web_1" {
   target_group_arn = aws_lb_target_group.web.arn
   target_id        = aws_instance.web_worker_1.id
-  port             = 30080
+  port             = 80
 }
 
 resource "aws_lb_target_group_attachment" "web_2" {
   target_group_arn = aws_lb_target_group.web.arn
   target_id        = aws_instance.web_worker_2.id
-  port             = 30080
+  port             = 80
 }
 
 resource "aws_lb_listener" "front_end" {
