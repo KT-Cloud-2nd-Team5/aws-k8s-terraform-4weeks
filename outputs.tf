@@ -25,7 +25,7 @@ output "B_cluster_nodes" {
 output "C_app_config" {
   description = "설정 참고값"
   value = {
-    # "1_ALB_DNS"       = "http://${aws_lb.main.dns_name}"
+    "1_ALB_DNS"       = "http://${aws_lb.main.dns_name}"
     "2_DB_Host"       = aws_instance.db_worker.private_ip
     "3_Proxy_Env_Var" = "export http_proxy=http://${aws_instance.bastion.private_ip}:3128 && export https_proxy=http://${aws_instance.bastion.private_ip}:3128"
   }

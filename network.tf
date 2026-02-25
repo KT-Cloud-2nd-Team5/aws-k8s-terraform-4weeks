@@ -188,12 +188,12 @@ resource "aws_security_group" "k3s_nodes" {
     security_groups = [aws_security_group.bastion.id]
   }
 
-  # ingress {
-  #   from_port       = 30000
-  #   to_port         = 32767
-  #   protocol        = "tcp"
-  #   security_groups = [aws_security_group.alb.id]
-  # }
+  ingress {
+    from_port       = 30000
+    to_port         = 32767
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
 
   ingress {
     from_port   = 8472
@@ -235,43 +235,43 @@ resource "aws_security_group" "monitoring" {
 # # -----------------------------------------------------------------------------
 # # ALB
 # # -----------------------------------------------------------------------------
-# # resource "aws_lb" "main" {
-# #   name               = "Firstproject-alb"
-# #   internal           = false
-# #   load_balancer_type = "application"
-# #   security_groups    = [aws_security_group.alb.id]
-# #   subnets            = [aws_subnet.public_a.id, aws_subnet.public_c.id]
-# #   tags               = { Name = "FirstProject-ALB" }
-# # }
+resource "aws_lb" "main" {
+  name               = "Firstproject-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb.id]
+  subnets            = [aws_subnet.public_a.id, aws_subnet.public_c.id]
+  tags               = { Name = "FirstProject-ALB" }
+}
 
-# resource "aws_lb_target_group" "web" {
-#   name     = "k3s-web-tg"
-#   port     = 30080
-#   protocol = "HTTP"
-#   vpc_id   = aws_vpc.main.id
-# }
+resource "aws_lb_target_group" "web" {
+  name     = "k3s-web-tg"
+  port     = 30080
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+}
 
-# resource "aws_lb_target_group_attachment" "web_1" {
-#   target_group_arn = aws_lb_target_group.web.arn
-#   target_id        = aws_instance.web_worker_1.id
-#   port             = 30080
-# }
+resource "aws_lb_target_group_attachment" "web_1" {
+  target_group_arn = aws_lb_target_group.web.arn
+  target_id        = aws_instance.web_worker_1.id
+  port             = 30080
+}
 
-# resource "aws_lb_target_group_attachment" "web_2" {
-#   target_group_arn = aws_lb_target_group.web.arn
-#   target_id        = aws_instance.web_worker_2.id
-#   port             = 30080
-# }
+resource "aws_lb_target_group_attachment" "web_2" {
+  target_group_arn = aws_lb_target_group.web.arn
+  target_id        = aws_instance.web_worker_2.id
+  port             = 30080
+}
 
-# # resource "aws_lb_listener" "front_end" {
-# #   load_balancer_arn = aws_lb.main.arn
-# #   port              = "80"
-# #   protocol          = "HTTP"
-# #   default_action {
-# #     type             = "forward"
-# #     target_group_arn = aws_lb_target_group.web.arn
-# #   }
-# # }
+resource "aws_lb_listener" "front_end" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = "80"
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.web.arn
+  }
+}
 
 
 
