@@ -105,7 +105,7 @@ resource "aws_instance" "web_worker_1" {
   subnet_id     = aws_subnet.public_a.id
   key_name      = var.key_name
   vpc_security_group_ids = [
-    aws_security_group.k3s_nodes.id,
+    aws_security_group.k3s_worker.id,
     aws_security_group.monitoring.id
   ]
   tags = {
@@ -128,7 +128,7 @@ resource "aws_instance" "web_worker_2" {
   subnet_id     = aws_subnet.public_c.id
   key_name      = var.key_name
   vpc_security_group_ids = [
-    aws_security_group.k3s_nodes.id,
+    aws_security_group.k3s_worker.id,
     aws_security_group.monitoring.id
   ]
   tags = {
@@ -151,7 +151,7 @@ resource "aws_instance" "db_worker" {
   subnet_id     = aws_subnet.private_a.id
   key_name      = var.key_name
   vpc_security_group_ids = [
-    aws_security_group.k3s_nodes.id,
+    aws_security_group.k3s_worker.id,
     aws_security_group.monitoring.id
   ]
   tags = {
