@@ -3,7 +3,7 @@ name: 01-Terraform Apply (Bastion Runner)
 on:
   push:
     #감시할 브랜치 설정 (main 혹은 cicd-test에 푸시될 때 작동)
-    branches: ["main", "cicd-test"]
+    branches: ["main", "cicd-test", "hanseo"]
     paths:
       - "**.tf"
       - "terraform.tfvars"

@@ -125,7 +125,7 @@ resource "aws_instance" "web_worker_1" {
 resource "aws_instance" "web_worker_2" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = "t3.small"
-  subnet_id     = aws_subnet.public_a.id
+  subnet_id     = aws_subnet.public_c.id
   key_name      = var.key_name
   vpc_security_group_ids = [
     aws_security_group.k3s_nodes.id,
