@@ -229,6 +229,10 @@ resource "aws_security_group" "monitoring" {
     cidr_blocks = ["10.0.0.0/16"]
     description = "Allow Kubelet API for HPA"
   }
+
+  tags = {
+    Name = "SG-Monitoring"
+  }
 }
 
 resource "aws_security_group" "alb" {
