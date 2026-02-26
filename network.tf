@@ -186,6 +186,7 @@ resource "aws_security_group" "k3s_nodes" {
     to_port         = 22
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion.id]
+
   }
 
   ingress {
@@ -200,7 +201,7 @@ resource "aws_security_group" "k3s_nodes" {
     to_port         = 80
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
-    description     = "ALB로 들어오는 80번 port (이후 k3s->ingress controller->web)"
+    description     = "ALB로 들어오는 80번 port 이후 k3s에서 ingress controller에서 web"
   }
 
 
