@@ -189,25 +189,18 @@ resource "aws_security_group" "k3s_nodes" {
   }
 
   ingress {
-    from_port       = 30000
-    to_port         = 32767
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb.id]
-  }
-
-  ingress {
     from_port   = 8472
     to_port     = 8472
     protocol    = "udp"
     cidr_blocks = ["10.0.0.0/16"]
   }
 
-  # ALB에서 들어오는 80번 포트(Traefik) 허용
   ingress {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
+    description     = "ALB로 들어오는 80번 port (이후 k3s->ingress controller->web)"
   }
 
 
