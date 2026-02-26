@@ -47,9 +47,9 @@ resource "aws_security_group_rule" "bastion_prometheus_from_k3s" {
   from_port                = 9090
   to_port                  = 9090
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.k3s_worker.id
+  source_security_group_id = aws_security_group.k3s_nodes.id
   security_group_id        = aws_security_group.bastion.id
-  description              = "Prometheus from K3s worker"
+  description              = "Prometheus from K3s nodes"
 }
 
 resource "aws_security_group_rule" "bastion_ingress_grafana" {
@@ -94,14 +94,14 @@ resource "aws_security_group_rule" "master_ingress_ssh" {
   description              = "SSH from Bastion"
 }
 
-resource "aws_security_group_rule" "master_ingress_api_from_worker" {
+resource "aws_security_group_rule" "master_ingress_api_from_nodes" {
   type                     = "ingress"
   from_port                = 6443
   to_port                  = 6443
   protocol                 = "tcp"
-  source_security_group_id = aws_security_group.k3s_worker.id
+  source_security_group_id = aws_security_group.k3s_nodes.id
   security_group_id        = aws_security_group.k3s_master.id
-  description              = "Kube API from Worker worker"
+  description              = "Kube API from Nodes"
 }
 
 resource "aws_security_group_rule" "master_ingress_api_from_master" {
@@ -111,7 +111,7 @@ resource "aws_security_group_rule" "master_ingress_api_from_master" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.k3s_master.id
   security_group_id        = aws_security_group.k3s_master.id
-  description              = "Kube API from Master worker"
+  description              = "Kube API from Master"
 }
 
 resource "aws_security_group_rule" "master_ingress_flannel_from_master" {
@@ -121,17 +121,17 @@ resource "aws_security_group_rule" "master_ingress_flannel_from_master" {
   protocol                 = "udp"
   source_security_group_id = aws_security_group.k3s_master.id
   security_group_id        = aws_security_group.k3s_master.id
-  description              = "Flannel VXLAN from Master worker"
+  description              = "Flannel VXLAN from Master"
 }
 
-resource "aws_security_group_rule" "master_ingress_flannel_from_worker" {
+resource "aws_security_group_rule" "master_ingress_flannel_from_nodes" {
   type                     = "ingress"
   from_port                = 8472
   to_port                  = 8472
   protocol                 = "udp"
-  source_security_group_id = aws_security_group.k3s_worker.id
+  source_security_group_id = aws_security_group.k3s_nodes.id
   security_group_id        = aws_security_group.k3s_master.id
-  description              = "Flannel VXLAN from Worker worker"
+  description              = "Flannel VXLAN from Nodes"
 }
 
 resource "aws_security_group_rule" "master_egress_all" {
@@ -144,64 +144,64 @@ resource "aws_security_group_rule" "master_egress_all" {
 }
 
 # -----------------------------------------------------------------------------
-# Worker Security Groups
+# nodes Security Groups
 # -----------------------------------------------------------------------------
-resource "aws_security_group" "k3s_worker" {
-  name   = "sg_k3s_worker"
+resource "aws_security_group" "k3s_nodes" {
+  name   = "sg_k3s_nodes"
   vpc_id = aws_vpc.main.id
 
   tags = {
-    Name = "SG-K3s-Worker"
+    Name = "SG-K3s-Nodes"
   }
 }
 
-resource "aws_security_group_rule" "worker_ingress_ssh" {
+resource "aws_security_group_rule" "nodes_ingress_ssh" {
   type                     = "ingress"
   from_port                = 22
   to_port                  = 22
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.bastion.id
-  security_group_id        = aws_security_group.k3s_worker.id
+  security_group_id        = aws_security_group.k3s_nodes.id
   description              = "SSH from Bastion"
 }
 
-resource "aws_security_group_rule" "worker_ingress_flannel_from_worker" {
+resource "aws_security_group_rule" "nodes_ingress_flannel_from_nodes" {
   type                     = "ingress"
   from_port                = 8472
   to_port                  = 8472
   protocol                 = "udp"
-  source_security_group_id = aws_security_group.k3s_worker.id
-  security_group_id        = aws_security_group.k3s_worker.id
-  description              = "Flannel VXLAN from Worker worker"
+  source_security_group_id = aws_security_group.k3s_nodes.id
+  security_group_id        = aws_security_group.k3s_nodes.id
+  description              = "Flannel VXLAN from Nodes"
 }
 
-resource "aws_security_group_rule" "worker_ingress_flannel_from_master" {
+resource "aws_security_group_rule" "nodes_ingress_flannel_from_master" {
   type                     = "ingress"
   from_port                = 8472
   to_port                  = 8472
   protocol                 = "udp"
   source_security_group_id = aws_security_group.k3s_master.id
-  security_group_id        = aws_security_group.k3s_worker.id
-  description              = "Flannel VXLAN from Master worker"
+  security_group_id        = aws_security_group.k3s_nodes.id
+  description              = "Flannel VXLAN from Master Nodes"
 }
 
-resource "aws_security_group_rule" "worker_ingress_http_alb" {
+resource "aws_security_group_rule" "nodes_ingress_http_alb" {
   type                     = "ingress"
   from_port                = 80
   to_port                  = 80
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.alb.id
-  security_group_id        = aws_security_group.k3s_worker.id
+  security_group_id        = aws_security_group.k3s_nodes.id
   description              = "Allow HTTP traffic from ALB to k3s ingress controller"
 }
 
-resource "aws_security_group_rule" "worker_egress_all" {
+resource "aws_security_group_rule" "nodes_egress_all" {
   type              = "egress"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.k3s_worker.id
+  security_group_id = aws_security_group.k3s_nodes.id
 }
 
 # -----------------------------------------------------------------------------
