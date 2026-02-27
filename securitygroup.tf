@@ -52,15 +52,15 @@ resource "aws_security_group_rule" "bastion_prometheus_from_k3s" {
   description              = "Prometheus from K3s nodes"
 }
 
-resource "aws_security_group_rule" "bastion_ingress_grafana" {
-  type              = "ingress"
-  from_port         = 3000
-  to_port           = 3000
-  protocol          = "tcp"
-  cidr_blocks       = var.pc_public_ips
-  security_group_id = aws_security_group.bastion.id
-  description       = "Grafana"
-}
+#resource "aws_security_group_rule" "bastion_ingress_grafana" {
+#  type              = "ingress"
+#  from_port         = 3000
+#  to_port           = 3000
+#  protocol          = "tcp"
+#  cidr_blocks       = var.pc_public_ips
+#  security_group_id = aws_security_group.bastion.id
+#  description       = "Grafana"
+#}
 
 resource "aws_security_group_rule" "bastion_egress_all" {
   type              = "egress"
