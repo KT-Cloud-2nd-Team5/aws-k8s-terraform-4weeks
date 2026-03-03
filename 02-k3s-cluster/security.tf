@@ -109,3 +109,15 @@ resource "aws_security_group_rule" "alb_egress" {
   cidr_blocks       = ["0.0.0.0/0"]
   security_group_id = aws_security_group.alb.id
 }
+
+
+# --- Rules: Bastion ---
+resource "aws_security_group_rule" "bastion_prometheus_from_k3s" {
+  type                     = "ingress"
+  from_port                = 9090
+  to_port                  = 9090
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.k3s_nodes.id
+  security_group_id        = var.bastion_sg_id
+  description              = "Prometheus from K3s nodes"
+}
