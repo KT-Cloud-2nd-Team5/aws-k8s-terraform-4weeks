@@ -64,7 +64,7 @@ resource "aws_instance" "bastion" {
   }
 
   lifecycle {
-    # 아래 나열된 항목은 코드에서 값이 바뀌더라도 실제 서버에 반영하지 않음
+    prevent_destroy = true
     ignore_changes = [
       ami,
       instance_type,
@@ -73,8 +73,6 @@ resource "aws_instance" "bastion" {
     ]
   }
   tags = { Name = "EC2-Bastion" }
-
-
 }
 
 resource "aws_instance" "k3s_master" {
