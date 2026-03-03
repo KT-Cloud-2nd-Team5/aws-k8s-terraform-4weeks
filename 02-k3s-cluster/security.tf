@@ -11,11 +11,6 @@ resource "aws_security_group" "k3s_nodes" {
   tags   = { Name = "SG-K3s-Nodes" }
 }
 
-resource "aws_security_group" "alb" {
-  name   = "sg_alb"
-  vpc_id = local.vpc_id
-  tags   = { Name = "SG-ALB" }
-}
 
 # --- Rules: Master ---
 resource "aws_security_group_rule" "master_ssh_from_bastion" {
@@ -91,24 +86,60 @@ resource "aws_security_group_rule" "nodes_egress" {
   security_group_id = aws_security_group.k3s_nodes.id
 }
 
-# --- Rules: ALB ---
-resource "aws_security_group_rule" "alb_http_ingress" {
-  type              = "ingress"
-  from_port         = 80
-  to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.alb.id
+
+# --- Rules: others ---
+resource "aws_security_group" "monitoring" {
+  name   = "sg_monitoring"
+  vpc_id = local.vpc_id
+
+  ingress {
+    from_port       = 9100
+    to_port         = 9100
+    protocol        = "tcp"
+    cidr_blocks     = ["10.0.0.0/16"]
+    security_groups = [local.bastion_sg_id]
+    description     = "Allow Prometheus on Bastion to scrape Node Exporter"
+  }
+
+  ingress {
+    from_port   = 10250
+    to_port     = 10250
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+    description = "Allow Kubelet API for HPA"
+  }
+
+  tags = {
+    Name = "SG-Monitoring"
+  }
 }
 
-resource "aws_security_group_rule" "alb_egress" {
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.alb.id
+resource "aws_security_group" "alb" {
+  name   = "sg_alb"
+  vpc_id = local.vpc_id
+  tags   = { Name = "SG-ALB" }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
+
 
 
 # --- Rules: Bastion ---
