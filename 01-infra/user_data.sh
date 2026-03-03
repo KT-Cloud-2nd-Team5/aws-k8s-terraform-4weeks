@@ -34,7 +34,7 @@ RUNNER_NAME="bastion-runner-$(hostname)"
 
 # GitHub API를 통해 Runner 등록 토큰(Registration Token) 발급
 # 주의: PAT는 'admin:org' (조직 러너) 권한이 있어야 토큰 발급이 가능합니다.
-REG_TOKEN=$(curl -s -X POST -H "Authorization: token $GITHUB_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/orgs/${GITHUB_ORG}/actions/runners/registration-token | jq .token --raw-output)
+REG_TOKEN=$(curl -s -X POST -H "Authorization: token $GITHUB_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/orgs/$GITHUB_ORG/actions/runners/registration-token | jq .token --raw-output)
 
 if [ "$REG_TOKEN" == "null" ]; then
     echo "Error: Failed to get registration token. Check PAT permissions."
@@ -66,7 +66,7 @@ sudo -u ubuntu bash << EOF
 cd $RUNNER_DIR
 
 # Runner 설정 (--unattended 모드로 비대화형 설치)
-./config.sh --url https://github.com/${GITHUB_ORG} --token $REG_TOKEN --unattended --name "$RUNNER_NAME" --work _work --labels "bastion,ubuntu"
+./config.sh --url https://github.com/$GITHUB_ORG --token $REG_TOKEN --unattended --name "$RUNNER_NAME" --work _work --labels "bastion,ubuntu"
 
 # 서비스 설치 및 시작 (sudo 필요)
 sudo ./svc.sh install
