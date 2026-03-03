@@ -12,10 +12,7 @@ GITHUB_PAT="${github_pat}"
 RUNNER_NAME="bastion-org-runner-$(hostname)"
 
 # GITHUB API를 통해 조직 레벨 등록 토큰 가져오기
-REG_TOKEN=$(curl -s -X POST \
-  -H "Authorization: token $GITHUB_PAT" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/orgs/$GITHUB_ORG/actions/runners/registration-token | jq -r .token)
+REG_TOKEN=$(curl -s -X POST -H "Authorization: token $GITHUB_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/orgs/$GITHUB_ORG/actions/runners/registration-token | jq -r .token)
   
 if [ "$REG_TOKEN" == "null" ] || [ -z "$REG_TOKEN" ]; then
     echo "Error: Failed to get Org registration token."
