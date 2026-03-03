@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main", "refactoring"]
     paths:
-      - "01-infra/**"          # 01 폴더가 변경될 때만 실행
+      - "01-infra/**" 
       - ".github/workflows/01-infra-apply.yml"
   workflow_dispatch:
 
@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   terraform-infra:
-    # 중요: Bastion을 만들거나 수정하는 작업이므로 외부 러너 사용
+    # Bastion 수정 -> 외부 러너 사용
     runs-on: ubuntu-latest
 
     env:

@@ -7,11 +7,10 @@ on:
       - "02-k3s-cluster/**"    # 02 폴더 변경 시 실행
       - ".github/workflows/02-k3s-apply.yml"
   
-  # 01-infra가 성공적으로 끝난 후 자동으로 이어서 실행하고 싶다면 추가 (선택사항)
-  workflow_run:
-    workflows: ["01-Terraform Apply (Infra Base)"]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ["01-Terraform Apply (Infra Base)"]
+  #   types:
+  #     - completed
       
   workflow_dispatch:
 
@@ -21,17 +20,15 @@ concurrency:
 
 jobs:
   terraform-k3s:
-    # 01-infra 배포가 성공했거나, 스킵되었을 때만 실행 (workflow_run 사용 시)
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
     
-    # 내부망 통신이 필요하므로 Bastion Runner 사용
     runs-on: self-hosted
 
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-2
-      TF_DIR: ./02-k3s-cluster  # 경로 수정됨
+      TF_DIR: ./02-k3s-cluster
       ANSIBLE_REPO: KT-Cloud-2nd-Team5/aws-k8s-ansible-4weeks
 
     steps:

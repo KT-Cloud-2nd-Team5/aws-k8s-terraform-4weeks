@@ -62,6 +62,7 @@ resource "aws_route_table_association" "pub_a" {
   subnet_id      = aws_subnet.public_a.id
   route_table_id = aws_route_table.public.id
 }
+
 resource "aws_route_table_association" "pub_c" {
   subnet_id      = aws_subnet.public_c.id
   route_table_id = aws_route_table.public.id
@@ -73,6 +74,7 @@ resource "aws_route_table" "private" {
     Name = "Private-RT"
   }
 }
+
 resource "aws_route_table_association" "priv_a" {
   subnet_id      = aws_subnet.private_a.id
   route_table_id = aws_route_table.private.id
