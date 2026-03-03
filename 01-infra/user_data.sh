@@ -34,7 +34,7 @@ RUNNER_NAME="bastion-runner-$(hostname)"
 
 # GitHub API를 통해 Runner 등록 토큰(Registration Token) 발급
 # 주의: PAT는 'admin:org' (조직 러너) 권한이 있어야 토큰 발급이 가능합니다.
-REG_TOKEN=$(curl -s -X POST -H "Authorization: token ${GITHUB_PAT}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/orgs/${GITHUB_ORG}/actions/runners/registration-token | jq .token --raw-output)
+REG_TOKEN=$(curl -s -X POST -H "Authorization: token $GITHUB_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/orgs/${GITHUB_ORG}/actions/runners/registration-token | jq .token --raw-output)
 
 if [ "$REG_TOKEN" == "null" ]; then
     echo "Error: Failed to get registration token. Check PAT permissions."
