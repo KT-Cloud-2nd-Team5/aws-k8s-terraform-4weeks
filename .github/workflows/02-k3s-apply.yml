@@ -7,10 +7,10 @@ on:
       - "02-k3s-cluster/**"    # 02 폴더 변경 시 실행
       - ".github/workflows/02-k3s-apply.yml"
   
-  # workflow_run:
-  #   workflows: ["01-Terraform Apply (Infra Base)"]
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows: ["01-Terraform Apply (Infra Base)"]
+    types:
+      - completed
       
   workflow_dispatch:
 
@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   terraform-k3s:
-    # if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name != 'workflow_run' }}
     
     runs-on: self-hosted
 
