@@ -8,12 +8,14 @@ apt-get update -y
 apt-get install -y jq squid curl tar libdigest-sha-perl
 
 # proxy setting (all allow)
-mv /etc/squid/squid.conf /etc/squid/squid.conf.original
 cat <<EOT > /etc/squid/squid.conf
+# ACL 정의: 모든 IP 대역(0.0.0.0/0)을 'all'이라는 이름으로 정의
+acl all src 0.0.0.0/0
 http_port 3128
 http_access allow all
 EOT
 
+systemctl stop squid
 systemctl enable squid
 systemctl start squid
 
