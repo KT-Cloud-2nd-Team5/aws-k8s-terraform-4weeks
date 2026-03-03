@@ -18,11 +18,14 @@ data "aws_ami" "ubuntu" {
 # EC2 Instances
 # -----------------------------------------------------------------------------
 resource "aws_instance" "k3s_master" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.small"
-  subnet_id              = local.private_subnet_ids[0]
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_master.id]
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.small"
+  subnet_id     = local.private_subnet_ids[0]
+  key_name      = var.key_name
+  vpc_security_group_ids = [
+    aws_security_group.k3s_master.id,
+    aws_security_group.monitoring
+  ]
 
   tags = {
     Name        = "K3s-Master"
@@ -38,11 +41,14 @@ resource "aws_instance" "k3s_master" {
 }
 
 resource "aws_instance" "web_worker_1" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.small"
-  subnet_id              = local.public_subnet_ids[0] # Public A
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.small"
+  subnet_id     = local.public_subnet_ids[0] # Public A
+  key_name      = var.key_name
+  vpc_security_group_ids = [
+    aws_security_group.k3s_nodes.id,
+    aws_security_group.monitoring
+  ]
 
   tags = {
     Name        = "K3s-Web-01"
@@ -59,11 +65,14 @@ resource "aws_instance" "web_worker_1" {
 }
 
 resource "aws_instance" "web_worker_2" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.small"
-  subnet_id              = local.public_subnet_ids[1] # Public C
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.small"
+  subnet_id     = local.public_subnet_ids[1] # Public C
+  key_name      = var.key_name
+  vpc_security_group_ids = [
+    aws_security_group.k3s_nodes.id,
+    aws_security_group.monitoring
+  ]
 
   tags = {
     Name        = "K3s-Web-02"
@@ -80,11 +89,14 @@ resource "aws_instance" "web_worker_2" {
 }
 
 resource "aws_instance" "db_worker" {
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = "t3.small"
-  subnet_id              = local.private_subnet_ids[0]
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = "t3.small"
+  subnet_id     = local.private_subnet_ids[0]
+  key_name      = var.key_name
+  vpc_security_group_ids = [
+    aws_security_group.k3s_nodes.id,
+    aws_security_group.monitoring
+  ]
 
   tags = {
     Name        = "K3s-DB-01"
