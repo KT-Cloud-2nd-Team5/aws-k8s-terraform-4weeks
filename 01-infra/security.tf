@@ -41,7 +41,6 @@ resource "aws_security_group_rule" "bastion_ingress_prometheus" {
   security_group_id = aws_security_group.bastion.id
 }
 
-
 # Grafana 접속 허용 (필요시 추가)
 resource "aws_security_group_rule" "bastion_ingress_grafana" {
   type              = "ingress"

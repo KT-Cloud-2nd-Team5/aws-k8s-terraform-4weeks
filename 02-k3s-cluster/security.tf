@@ -140,8 +140,6 @@ resource "aws_security_group" "alb" {
   }
 }
 
-
-
 # --- Rules: Bastion ---
 resource "aws_security_group_rule" "bastion_prometheus_from_k3s" {
   type                     = "ingress"
