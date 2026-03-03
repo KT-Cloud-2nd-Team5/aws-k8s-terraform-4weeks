@@ -44,8 +44,7 @@ resource "aws_instance" "bastion" {
   }
 
   lifecycle {
-    ignore_changes  = [ami]
-    prevent_destroy = true
+    ignore_changes = [ami]
   }
 
 }
