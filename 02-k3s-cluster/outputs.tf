@@ -21,6 +21,8 @@ output "B_cluster_nodes" {
   }
 }
 
+
+
 # [3] 설정값
 output "C_app_config" {
   description = "설정 참고값"

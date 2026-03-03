@@ -10,7 +10,7 @@ echo "Start user_data script..."
 # squid: 프록시 서버
 apt-get update -y
 apt-get install -y jq squid curl tar libdigest-sha-perl
-
+sed -i 's/http_access deny all/http_access allow all/g' /etc/squid/squid.conf
 # ------------------------------------------------------------------
 # 3. Squid 설정 (기본 설정)
 # ------------------------------------------------------------------
