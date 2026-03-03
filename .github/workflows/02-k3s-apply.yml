@@ -1,32 +1,33 @@
-name: 01-Terraform Apply (Bastion Runner)
+name: 02-Terraform Apply (K3s Cluster)
 
 on:
   push:
-    #감시할 브랜치 설정 (main 혹은 cicd-test에 푸시될 때 작동)
     branches: ["main", "cicd-test", "hanseo2"]
+    
     paths:
-      - "**.tf"
-      - "terraform.tfvars"
-      - ".github/workflows/01-terraform-apply.yml"
-
-  #버튼 클릭으로 수동 실행 가능하게 설정
-  workflow_dispatch: 
+      - "02-k3s-cluster/**"
+      - ".github/workflows/02-k3s-apply.yml"
+  
+  workflow_run:
+    workflows: ["01-Terraform Apply (Infra Base)"]
+    types:
+      - completed
+      
+  workflow_dispatch:
 
 concurrency:
-  group: terraform-apply
+  group: terraform-k3s
   cancel-in-progress: false
 
 jobs:
-  terraform-apply:
-    # 직접 띄운 서버(Bastion)의 러너 사용
+  terraform-k3s:    
     runs-on: self-hosted
 
     env:
-      #GitHub Secrets에서 가져올 보안 정보
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-2
-      TF_DIR: .
+      TF_DIR: ./02-k3s-cluster
       ANSIBLE_REPO: KT-Cloud-2nd-Team5/aws-k8s-ansible-4weeks
 
     steps:
@@ -44,22 +45,11 @@ jobs:
           terraform_version: "1.7.5"
           terraform_wrapper: false
 
-      - name: Clear AWS_PROFILE
-        run: unset AWS_PROFILE
-
       - name: Terraform Init
         working-directory: ${{ env.TF_DIR }}
         run: terraform init -input=false
 
-      - name: Terraform Format Check
-        working-directory: ${{ env.TF_DIR }}
-        run: terraform fmt -check -recursive || echo "Format check failed, but continuing..."
-
-      - name: Terraform Validate
-        working-directory: ${{ env.TF_DIR }}
-        run: terraform validate
-
-      - name: Terraform Plan (detect changes)
+      - name: Terraform Plan
         id: plan
         working-directory: ${{ env.TF_DIR }}
         run: |
@@ -69,23 +59,22 @@ jobs:
           echo "PLAN_EXITCODE=$code" >> $GITHUB_ENV
           
           if [ "$code" -eq 0 ]; then
-            echo "결과: 변경 사항 없음."
+             echo "결과: 변경 사항 없음."
           elif [ "$code" -eq 2 ]; then
-            echo "결과: 인프라 변경 감지됨. Apply를 진행합니다."
+             echo "결과: 인프라 변경 감지됨. Apply를 진행합니다."
           else
-            echo "결가: Plan 중 에러 발생."
-            exit 1
+             echo "결과: Plan 중 에러 발생."
+             exit 1
           fi
 
-      - name: Terraform Apply (only if changes)
-        # Plan 결과가 '2'(변경 있음)일 때만 실제 반영
+      - name: Terraform Apply
         if: env.PLAN_EXITCODE == '2'
         working-directory: ${{ env.TF_DIR }}
         run: terraform apply -auto-approve tfplan
 
-      # 테라폼 성공 시 앤서블 레포지토리 실행 트리거
+      # 클러스터 인스턴스(K3s)가 변경되었을 때 Ansible 실행
       - name: Trigger Ansible Repository
-        if: env.PLAN_EXITCODE == '2' # 인프라 변경이 실제로 있을 때만 앤서블 호출
+        if: env.PLAN_EXITCODE == '2'
         env:
           DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
         run: |

@@ -1,18 +1,23 @@
 # -----------------------------------------------------------------------------
-# Beckend (s3 & dynamodb_table)
-# for save terraform state
+# Provider & Versions & Backend
 # -----------------------------------------------------------------------------
-
 terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws",
+      version = "~> 5.0"
+    }
+  }
+
   backend "s3" {
     bucket         = "team5-tfstate"
-    key            = "dev/terraform.tfstate" # 저장될 경로 및 파일명
+    key            = "dev/base-infra/terraform.tfstate"
     region         = "ap-northeast-2"
     encrypt        = true
     dynamodb_table = "terraform-lock-table"
   }
 }
 
-data "aws_s3_bucket" "tfstate_bucket" {
-  bucket = "team5-tfstate"
+provider "aws" {
+  region = "ap-northeast-2"
 }
