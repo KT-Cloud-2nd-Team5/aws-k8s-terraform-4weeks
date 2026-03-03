@@ -17,7 +17,7 @@ data "aws_ami" "ubuntu" {
 }
 
 # -----------------------------------------------------------------------------
-# Bastion Server (runners)
+# Bastion Server (runner)
 # -----------------------------------------------------------------------------
 resource "aws_instance" "bastion" {
   ami                    = data.aws_ami.ubuntu.id
