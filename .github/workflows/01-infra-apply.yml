@@ -1,0 +1,53 @@
+name: 01-Terraform Apply (Infra Base)
+
+on:
+  push:
+    branches: ["main", "refactoring"]
+    paths:
+      - "01-infra/**"          # 01 폴더가 변경될 때만 실행
+      - ".github/workflows/01-infra-apply.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: terraform-infra
+  cancel-in-progress: false
+
+jobs:
+  terraform-infra:
+    # 중요: Bastion을 만들거나 수정하는 작업이므로 외부 러너 사용
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ap-northeast-2
+      TF_DIR: ./01-infra  # 경로 수정됨
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          set +e
+          terraform plan -detailed-exitcode -out=tfplan
+          code=$?
+          echo "PLAN_EXITCODE=$code" >> $GITHUB_ENV
+          if [ "$code" -eq 0 ]; then echo "변경 없음"; elif [ "$code" -eq 2 ]; then echo "변경 감지"; else exit 1; fi
+
+      - name: Terraform Apply
+        if: env.PLAN_EXITCODE == '2'
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform apply -auto-approve tfplan
