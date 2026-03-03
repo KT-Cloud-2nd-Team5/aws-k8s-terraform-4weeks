@@ -50,10 +50,10 @@ sudo -u ubuntu bash << EOF
 cd $RUNNER_DIR
 
 # Runner 다운로드
-curl -o actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
+curl -o actions-runner-linux-x64-$RUNNER_VERSION.tar.gz -L https://github.com/actions/runner/releases/download/v$RUNNER_VERSION/actions-runner-linux-x64-$RUNNER_VERSION.tar.gz
 
 # 압축 해제
-tar xzf ./actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
+tar xzf ./actions-runner-linux-x64-$RUNNER_VERSION.tar.gz
 
 # 의존성 설치 (루트 권한 필요하므로 sudo 사용)
 EOF
