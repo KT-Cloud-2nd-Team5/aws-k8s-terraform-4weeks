@@ -25,9 +25,11 @@ resource "aws_instance" "k3s_master" {
   vpc_security_group_ids = [aws_security_group.k3s_master.id]
 
   tags = {
-    Name = "K3s-Master",
-    Role = "master"
+    Name        = "K3s-Master"
+    Role        = "master"
+    Environment = "dev"
   }
+
   lifecycle {
     ignore_changes = [
       ami,
@@ -43,9 +45,12 @@ resource "aws_instance" "web_worker_1" {
   vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
 
   tags = {
-    Name = "K3s-Web-01",
-    Role = "worker"
+    Name        = "K3s-Web-01"
+    Role        = "web"
+    Type        = "workers"
+    Environment = "dev"
   }
+
   lifecycle {
     ignore_changes = [
       ami,
@@ -61,9 +66,12 @@ resource "aws_instance" "web_worker_2" {
   vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
 
   tags = {
-    Name = "K3s-Web-02",
-    Role = "worker"
+    Name        = "K3s-Web-02"
+    Role        = "web"
+    Type        = "workers"
+    Environment = "dev"
   }
+
   lifecycle {
     ignore_changes = [
       ami,
@@ -79,9 +87,12 @@ resource "aws_instance" "db_worker" {
   vpc_security_group_ids = [aws_security_group.k3s_nodes.id]
 
   tags = {
-    Name = "K3s-DB-01",
-    Role = "worker"
+    Name        = "K3s-DB-01"
+    Role        = "db"
+    Type        = "workers"
+    Environment = "dev"
   }
+
   lifecycle {
     ignore_changes = [
       ami,
