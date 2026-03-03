@@ -8,3 +8,7 @@ variable "private_key_path" {
 variable "bastion_sg_id" {
   type = string
 }
+
+variable "bas" {
+  type = string
+}
