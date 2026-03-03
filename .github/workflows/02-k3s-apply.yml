@@ -3,7 +3,6 @@ name: 02-Terraform Apply (K3s Cluster)
 on:
   push:
     branches: ["main", "cicd-test", "hanseo2"]
-    
     paths:
       - "02-k3s-cluster/**"
       - ".github/workflows/02-k3s-apply.yml"
@@ -72,16 +71,6 @@ jobs:
         working-directory: ${{ env.TF_DIR }}
         run: terraform apply -auto-approve tfplan
 
-      - name: Docker Login
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build & Push Web App (Mandatory for Initial Deploy)
-        run: |
-          # app 폴더 경로가 맞는지 확인하세요
-          docker build -t kimkiyeol/web-app:latest ./app
-          docker push kimkiyeol/web-app:latest
-            
       # 클러스터 인스턴스(K3s)가 변경되었을 때 Ansible 실행
       - name: Trigger Ansible Repository
         if: env.PLAN_EXITCODE == '2'
