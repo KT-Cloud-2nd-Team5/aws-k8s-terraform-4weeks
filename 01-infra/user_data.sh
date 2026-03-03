@@ -56,4 +56,5 @@ cd $RUNNER_DIR
 sudo ./svc.sh install
 sudo ./svc.sh start
 EOF
+
 echo "GitHub Action Runner installation completed."
