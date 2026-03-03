@@ -9,3 +9,4 @@ pc_public_ips = [
 key_name = "team_project"
 
 github_org = "KT-Cloud-2nd-Team5"
+
