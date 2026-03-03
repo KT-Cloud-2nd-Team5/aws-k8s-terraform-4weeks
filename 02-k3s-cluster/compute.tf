@@ -24,7 +24,7 @@ resource "aws_instance" "k3s_master" {
   key_name      = var.key_name
   vpc_security_group_ids = [
     aws_security_group.k3s_master.id,
-    aws_security_group.monitoring
+    aws_security_group.monitoring.id
   ]
 
   tags = {
@@ -47,7 +47,7 @@ resource "aws_instance" "web_worker_1" {
   key_name      = var.key_name
   vpc_security_group_ids = [
     aws_security_group.k3s_nodes.id,
-    aws_security_group.monitoring
+    aws_security_group.monitoring.id
   ]
 
   tags = {
@@ -71,7 +71,7 @@ resource "aws_instance" "web_worker_2" {
   key_name      = var.key_name
   vpc_security_group_ids = [
     aws_security_group.k3s_nodes.id,
-    aws_security_group.monitoring
+    aws_security_group.monitoring.id
   ]
 
   tags = {
@@ -95,7 +95,7 @@ resource "aws_instance" "db_worker" {
   key_name      = var.key_name
   vpc_security_group_ids = [
     aws_security_group.k3s_nodes.id,
-    aws_security_group.monitoring
+    aws_security_group.monitoring.id
   ]
 
   tags = {
