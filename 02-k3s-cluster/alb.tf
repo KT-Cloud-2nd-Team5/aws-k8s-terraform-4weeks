@@ -31,6 +31,7 @@ resource "aws_lb_target_group_attachment" "web_2" {
   port             = 80
 }
 
+
 resource "aws_lb_listener" "front_end" {
   load_balancer_arn = aws_lb.main.arn
   port              = "80"

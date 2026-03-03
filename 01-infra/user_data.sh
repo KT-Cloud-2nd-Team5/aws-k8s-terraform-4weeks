@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 
 # Squid Proxy 설치
 apt update -y
@@ -12,25 +13,25 @@ GITHUB_PAT="${github_pat}"
 RUNNER_NAME="bastion-org-runner-$(hostname)"
 
 # GITHUB API를 통해 조직 레벨 등록 토큰 가져오기
-REG_TOKEN=$(curl -s -X POST -H "Authorization: token $GITHUB_PAT" -H "Accept: application/vnd.github.v3+json" https://api.github.com/orgs/$GITHUB_ORG/actions/runners/registration-token | jq -r .token)
-  
+REG_TOKEN=$(curl -s -X POST -H "Authorization: token ${github_pat}" -H "Accept: application/vnd.github.v3+json" https://api.github.com/orgs/${github_org}/actions/runners/registration-token | jq -r .token)
+
 if [ "$REG_TOKEN" == "null" ] || [ -z "$REG_TOKEN" ]; then
     echo "Error: Failed to get Org registration token."
     exit 1
 fi
 
-# 4. Runner 설치 경로 생성 및 이동
+# Runner 설치 (한 줄로 정리 및 의존성 추가)
 mkdir -p /home/ubuntu/actions-runner && cd /home/ubuntu/actions-runner
-
-# 최신 버전 다운로드
 LATEST_VERSION=$(curl -s https://api.github.com/repos/actions/runner/releases/latest | jq -r .tag_name | sed 's/v//')
-curl -o actions-runner-linux-x64-$${LATEST_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v$${LATEST_VERSION}/actions-runner-linux-x64-$${LATEST_VERSION}.tar.gz
+
+# 다운로드 주소 한 줄로 처리
+curl -o actions-runner-linux-x64-$${LATEST_VERSION}.tar.gz -L "https://github.com/actions/runner/releases/download/v$${LATEST_VERSION}/actions-runner-linux-x64-$${LATEST_VERSION}.tar.gz"
+
 tar xzf ./actions-runner-linux-x64-$${LATEST_VERSION}.tar.gz
 
-# 5. 필수 의존성 설치 (매우 중요)
+# 필수 의존성 설치 추가 (이게 없으면 config.sh가 실패할 수 있음)
 ./bin/installdependencies.sh
 
-# 소유권 변경
 chown -R ubuntu:ubuntu /home/ubuntu/actions-runner
 
 # 6. Runner 설정 (ubuntu 유저로 실행)
