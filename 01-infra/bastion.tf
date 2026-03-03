@@ -31,6 +31,7 @@ resource "aws_instance" "bastion" {
     github_org = var.github_org
     github_pat = var.github_pat
   }), "\r", "")
+
   tags = {
     Name        = "EC2-Bastion"
     Role        = "bastion"

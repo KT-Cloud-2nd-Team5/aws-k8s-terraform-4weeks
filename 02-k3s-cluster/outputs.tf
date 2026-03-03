@@ -10,7 +10,7 @@ output "A_connection_commands" {
   }
 }
 
-# [2] 클러스터 노드 정보
+#  클러스터 노드 정보
 output "B_cluster_nodes" {
   description = "K3s 노드들의 IP 정보"
   value = {
