@@ -11,7 +11,7 @@ terraform {
 
   backend "s3" {
     bucket         = "team5-tfstate"
-    key            = "dev/base-infra/terraform.tfstate" # 경로 분리됨
+    key            = "dev/base-infra/terraform.tfstate"
     region         = "ap-northeast-2"
     encrypt        = true
     dynamodb_table = "terraform-lock-table"
