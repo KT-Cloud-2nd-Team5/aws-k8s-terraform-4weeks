@@ -172,3 +172,13 @@ resource "aws_security_group_rule" "bastion_prometheus_from_k3s" {
   security_group_id        = local.bastion_sg_id
   description              = "Prometheus from K3s nodes"
 }
+
+resource "aws_security_group_rule" "bastion_prometheus_from_k3s" {
+  type                     = "ingress"
+  from_port                = 9090
+  to_port                  = 9090
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.k3s_master.id
+  security_group_id        = local.bastion_sg_id
+  description              = "Prometheus from K3s master"
+}
