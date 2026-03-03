@@ -20,6 +20,7 @@ resource "aws_security_group_rule" "master_ssh_from_bastion" {
   protocol                 = "tcp"
   source_security_group_id = local.bastion_sg_id
   security_group_id        = aws_security_group.k3s_master.id
+  description              = "SSH from Bastion"
 }
 
 resource "aws_security_group_rule" "master_api_from_nodes" {
@@ -29,14 +30,34 @@ resource "aws_security_group_rule" "master_api_from_nodes" {
   protocol                 = "tcp"
   source_security_group_id = aws_security_group.k3s_nodes.id
   security_group_id        = aws_security_group.k3s_master.id
+  description              = "Kube API from Nodes"
 }
 
-resource "aws_security_group_rule" "master_flannel_udp" {
+resource "aws_security_group_rule" "master_ingress_api_from_master" {
+  type                     = "ingress"
+  from_port                = 6443
+  to_port                  = 6443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.k3s_master.id
+  security_group_id        = aws_security_group.k3s_master.id
+  description              = "Kube API from Master"
+}
+
+resource "aws_security_group_rule" "master_flannel_udp_from_nodes" {
   type                     = "ingress"
   from_port                = 8472
   to_port                  = 8472
   protocol                 = "udp"
   source_security_group_id = aws_security_group.k3s_nodes.id
+  security_group_id        = aws_security_group.k3s_master.id
+}
+
+resource "aws_security_group_rule" "master_ingress_flannel_from_master" {
+  type                     = "ingress"
+  from_port                = 8472
+  to_port                  = 8472
+  protocol                 = "udp"
+  source_security_group_id = aws_security_group.k3s_master.id
   security_group_id        = aws_security_group.k3s_master.id
 }
 
@@ -59,6 +80,7 @@ resource "aws_security_group_rule" "nodes_ssh_from_bastion" {
   security_group_id        = aws_security_group.k3s_nodes.id
 }
 
+
 resource "aws_security_group_rule" "nodes_http_from_alb" {
   type                     = "ingress"
   from_port                = 80
@@ -73,7 +95,7 @@ resource "aws_security_group_rule" "nodes_flannel_udp" {
   from_port         = 8472
   to_port           = 8472
   protocol          = "udp"
-  self              = true # Allow from other nodes in same SG
+  self              = true
   security_group_id = aws_security_group.k3s_nodes.id
 }
 
