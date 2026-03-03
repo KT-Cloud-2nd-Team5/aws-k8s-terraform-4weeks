@@ -23,4 +23,3 @@ locals {
   bastion_priv_ip = data.terraform_remote_state.base.outputs.bastion_private_ip
   bastion_pub_ip  = data.terraform_remote_state.base.outputs.bastion_public_ip
 }
-
