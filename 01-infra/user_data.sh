@@ -18,22 +18,25 @@ REG_TOKEN=$(curl -s -X POST \
   https://api.github.com/orgs/$GITHUB_ORG/actions/runners/registration-token | jq -r .token)
   
 if [ "$REG_TOKEN" == "null" ] || [ -z "$REG_TOKEN" ]; then
-    echo "Error: Failed to get Org registration token. Check 'admin:org' permission."
+    echo "Error: Failed to get Org registration token."
     exit 1
 fi
 
-
-REG_TOKEN=$(curl -s -X POST \
-  -H "Authorization: token $GITHUB_PAT" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/orgs/$GITHUB_ORG/actions/runners/registration-token | jq -r .token)
-
-# Runner 설치 (버전 다운로드 로직 동일)
+# 4. Runner 설치 경로 생성 및 이동
 mkdir -p /home/ubuntu/actions-runner && cd /home/ubuntu/actions-runner
+
+# 최신 버전 다운로드
 LATEST_VERSION=$(curl -s https://api.github.com/repos/actions/runner/releases/latest | jq -r .tag_name | sed 's/v//')
 curl -o actions-runner-linux-x64-$${LATEST_VERSION}.tar.gz -L https://github.com/actions/runner/releases/download/v$${LATEST_VERSION}/actions-runner-linux-x64-$${LATEST_VERSION}.tar.gz
 tar xzf ./actions-runner-linux-x64-$${LATEST_VERSION}.tar.gz
+
+# 5. 필수 의존성 설치 (매우 중요)
+./bin/installdependencies.sh
+
+# 소유권 변경
 chown -R ubuntu:ubuntu /home/ubuntu/actions-runner
+
+# 6. Runner 설정 (ubuntu 유저로 실행)
 sudo -u ubuntu ./config.sh \
   --url "https://github.com/$GITHUB_ORG" \
   --token "$REG_TOKEN" \
@@ -42,6 +45,6 @@ sudo -u ubuntu ./config.sh \
   --labels "bastion,org-runner" \
   --replace
 
-# 서비스 실행
-./svc.sh install
+# 7. 서비스 등록 및 시작 (sudo 권한 필요)
+./svc.sh install ubuntu
 ./svc.sh start

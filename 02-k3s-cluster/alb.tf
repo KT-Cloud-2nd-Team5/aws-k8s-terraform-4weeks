@@ -25,7 +25,6 @@ resource "aws_lb_target_group_attachment" "web_1" {
   port             = 80
 }
 
-
 resource "aws_lb_target_group_attachment" "web_2" {
   target_group_arn = aws_lb_target_group.web_80.arn
   target_id        = aws_instance.web_worker_2.id
