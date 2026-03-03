@@ -72,7 +72,11 @@ resource "aws_instance" "bastion" {
       key_name
     ]
   }
-  tags = { Name = "EC2-Bastion" }
+  tags = { 
+    Name        = "EC2-Bastion"
+    Role        = "bastion"
+    Environment = "dev"
+  }
 }
 
 resource "aws_instance" "k3s_master" {
