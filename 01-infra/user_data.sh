@@ -28,7 +28,7 @@ echo "Squid installation completed."
 # 변수 설정 (Terraform에서 주입됨)
 GITHUB_ORG="${github_org}"
 GITHUB_PAT="${github_pat}"
-RUNNER_VERSION="2.313.0" # 최신 버전을 확인하여 변경 권장
+RUNNER_VERSION="2.330.0" # 최신 버전을 확인하여 변경 권장
 RUNNER_DIR="/home/ubuntu/actions-runner"
 RUNNER_NAME="bastion-runner-$(hostname)"
 
