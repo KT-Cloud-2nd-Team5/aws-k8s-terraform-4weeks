@@ -9,6 +9,7 @@ resource "aws_security_group" "bastion" {
   tags        = { Name = "SG-Bastion" }
 }
 
+
 # Rule 1: SSH from My PC
 resource "aws_security_group_rule" "bastion_ingress_ssh" {
   type              = "ingress"
